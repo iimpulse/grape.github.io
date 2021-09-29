@@ -7,9 +7,10 @@ Tests related to database availability, creation, and interaction
 # pylint just can't tell
 #pylint: disable=E1101
 
+from src.app.model.type_model import TypeModel, TypeSchema
 import unittest
 from src.test import BaseDBTestCase
-from src.app.model.hello_world_model import Hello, HelloSchema
+from src.app.model.version_model import VersionModel, VersionSchema
 
 
 class DbConnectionTest(BaseDBTestCase):
@@ -21,51 +22,69 @@ class DbConnectionTest(BaseDBTestCase):
             self.assertFalse(conn.closed)
 
 
-class SqlalchemyHelloModelTest(BaseDBTestCase):
+class VersionModelTest(BaseDBTestCase):
     """ Test interacting with the provided sqlalchemy definitions """
 
     def setUp(self):
-        self.common_names = ("Liam", "Noah", "William", "James", "Logan")
-        hellos = [Hello(who=name) for name in self.common_names]
-        self.session.bulk_save_objects(hellos)
+        self.data = ({"code": "1.0.0", "name": "winecountry"}, {"code": "2.0.0", "name": "winecountry2"})
+        versions = [VersionModel(version_code=version["code"], version_name=version["name"]) for version in self.data]
+        self.session.bulk_save_objects(versions)
         self.session.commit()
 
-    def test_get_hellos(self):
+    def test_get_versions(self):
         """ Test getting back all entries """
-        hellos = Hello.query.all()
-        self.assertTrue(len(hellos) == 5)
-        for hello in hellos:
-            serialized = HelloSchema().dump(hello)
-            self.assertTrue(serialized['who'] in self.common_names)
+        versions = VersionModel.query.all()
+        self.assertTrue(len(versions) == 2)
+        for version in versions:
+            serialized = VersionSchema().dump(version)
+            self.assertTrue(serialized['version_code'] in [version["code"] for version in self.data])
 
-    def test_get_hello_by_name(self):
+    def test_get_version_by_name(self):
         """ Test getting an entry by name """
-        hello = Hello.query.filter_by(who=self.common_names[0]).first()
-        self.assertTrue(hello is not None)
-        self.assertEqual(hello.who, self.common_names[0])
+        version = VersionModel.query.filter_by(version_name=self.data[0]["name"]).first()
+        self.assertTrue(version is not None)
+        self.assertEqual(version.version_name, self.data[0]["name"])
 
-    def test_query_nonexistant_hello(self):
+    def test_query_nonexistant_version(self):
         """ Test that getting by non-existant name has no result """
-        hello = Hello.query.filter_by(who="John").first()
-        self.assertEqual(hello, None)
-
-    def test_update_hello(self):
-        """ Test that an entry change is successful """
-        hello = Hello.query.filter_by(who=self.common_names[2]).first()
-        hello.who = "Bill"
-        self.session.commit()
-        hello_bill = Hello.query.filter_by(who="Bill").first()
-        self.assertEqual(hello_bill.who, "Bill")
-
-    def test_delete_model(self):
-        """ Test that the entry can be deleted """
-        Hello.query.delete()
-        self.session.commit()
-        hellos = Hello.query.all()
-        self.assertEqual(len(hellos), 0)
+        version = VersionModel.query.filter_by(version_name="notwinecountry").first()
+        self.assertEqual(version, None)
 
     def tearDown(self):
-        Hello.query.delete()
+        VersionModel.query.delete()
+        self.session.commit()
+        self.session.remove()
+
+class TypeModelTest(BaseDBTestCase):
+    """ Test interacting with the provided sqlalchemy definitions """
+
+    def setUp(self):
+        self.data = ({"id": 1, "name": "String"}, {"id": 3, "name": "Integer"}, {"id": 2, "name": "Float"})
+        types = [TypeModel(type_id=type["id"], type_name=type["name"]) for type in self.data]
+        self.session.bulk_save_objects(types)
+        self.session.commit()
+
+    def test_get_types(self):
+        """ Test getting back all entries """
+        types = TypeModel.query.all()
+        self.assertTrue(len(types) == 3)
+        for type in types:
+            serialized = TypeSchema().dump(type)
+            self.assertTrue(serialized['type_name'] in [type["name"] for type in self.data])
+
+    def test_get_types_by_name(self):
+        """ Test getting an entry by name """
+        type = TypeModel.query.filter_by(type_name=self.data[0]["name"]).first()
+        self.assertTrue(type is not None)
+        self.assertEqual(type.type_name, self.data[0]["name"])
+
+    def test_query_nonexistant_type(self):
+        """ Test that getting by non-existant name has no result """
+        type = TypeModel.query.filter_by(type_name="hashmap").first()
+        self.assertEqual(type, None)
+
+    def tearDown(self):
+        TypeModel.query.delete()
         self.session.commit()
         self.session.remove()
 

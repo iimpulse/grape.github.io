@@ -16,7 +16,7 @@ class VersionModel(BASE):
     version_name = Column(String)
     created = Column(DateTime)
 
-class VersionsSchema(MA.SQLAlchemyAutoSchema): # pylint: disable=too-many-ancestors
+class VersionSchema(MA.SQLAlchemyAutoSchema): # pylint: disable=too-many-ancestors
     """ Creates a serializer from the sqlalchemy model definition """
     class Meta:
         """ Metaclass """
