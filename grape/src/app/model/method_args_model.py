@@ -14,7 +14,7 @@ class MethodArgsModel(BASE):
     argument_name = Column(String)
     description = Column(String)
     default_value = Column(String)
-    method_id = Column(Integer, ForeignKey("versions.version_id"))
+    method_id = Column(Integer, ForeignKey("method.method_id"))
     return_type_id = Column(Integer, ForeignKey("types.type_id"))
 
 class MethodArgsSchema(MA.SQLAlchemyAutoSchema): # pylint: disable=too-many-ancestors

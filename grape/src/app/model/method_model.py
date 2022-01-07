@@ -3,6 +3,7 @@
 """
 # Disable "Too few public methods" check
 # pylint: disable=R0903
+from grape.src.app.model.method_args_model import MethodArgsModel
 from src.app.model.type_model import TypeModel
 from src.app.model.version_model import VersionModel
 from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey
@@ -15,14 +16,17 @@ class MethodModel(BASE):
 
     method_id = Column(Integer, primary_key=True)
     method_name = Column(String)
-    version_id = Column(Integer, ForeignKey("versions.id"))
-    version = relationship(VersionModel)
     human_test_coverage = Column(Float)
     fuzzer_test_coverage = Column(Float)
     description = Column(String)
-    return_type_id = Column(Integer, ForeignKey("types.type_id"))
-    return_types = relationship(TypeModel)
     created = Column(DateTime)
+    class_id = Column(Integer, ForeignKey("classes.class_id"))
+    arguments = relationship(MethodArgsModel, backref='methods', lazy='dynamic')
+    version = relationship(VersionModel, backref='methods', lazy='dynamic')
+       
+
+# One Method can have many different versions
+# One Versions can have many different methods?
 
 class MethodSchema(MA.SQLAlchemyAutoSchema): # pylint: disable=too-many-ancestors
     """ Creates a serializer from the sqlalchemy model definition """

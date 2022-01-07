@@ -11,9 +11,8 @@ from . import BASE, MA
 class VersionModel(BASE):
     """ Keep track of who says hello and when """
     __tablename__ = "versions"
-    id = Column(Integer, primary_key=True)
-    version_code = Column(String)
-    version_name = Column(String)
+    version_code = Column(String, primary_key=True, unique=True)
+    version_name = Column(String, unique=True)
     created = Column(DateTime)
 
 class VersionSchema(MA.SQLAlchemyAutoSchema): # pylint: disable=too-many-ancestors

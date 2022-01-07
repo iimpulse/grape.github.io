@@ -5,6 +5,7 @@ This defines the class table for use with sqlalchemy
 # pylint: disable=R0903
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey
+from grape.src.app.model.method_model import MethodModel
 from src.app.model.module_model import ModuleModel
 from . import BASE, MA
 
@@ -15,7 +16,7 @@ class ClassModel(BASE):
     class_name = Column(String)
     description = Column(String)
     module_id = Column(Integer, ForeignKey("modules.module_id"))
-    module = relationship(ModuleModel)
+    methods = relationship(MethodModel)
 
 class ClassSchema(MA.SQLAlchemyAutoSchema): # pylint: disable=too-many-ancestors
     """ Creates a serializer from the sqlalchemy model definition """
